@@ -51,7 +51,9 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         tv_longitud = (TextView) findViewById(R.id.tv_long);
         get_location_button = (Button) findViewById(R.id.get_location);
 
+
         initMap();
+        Toast.makeText(getApplication(),"welcome to app",Toast.LENGTH_LONG);
 
         get_location_button.setOnClickListener(new View.OnClickListener() {
             @Override
