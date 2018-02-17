@@ -1,6 +1,7 @@
 package com.example.kevin.geofencing_mendez;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,6 +19,7 @@ public class Welcome extends AppCompatActivity {
         setContentView(R.layout.activity_welcome);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         start_app = (Button) findViewById(R.id.start);
+
 
         start_app.setOnClickListener(new View.OnClickListener() {
             @Override
