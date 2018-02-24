@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class Welcome extends AppCompatActivity {
     private Button start_app;
@@ -18,9 +19,8 @@ public class Welcome extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         start_app = (Button) findViewById(R.id.start);
-
-
         start_app.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

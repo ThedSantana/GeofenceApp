@@ -19,7 +19,7 @@ public class Constants {
 
     static {
         // stanford university.
-        AREA_LANDMARKS.put(GEOFENCE_REQUQEST_ID, new LatLng(37.427476, -122.170262));
+        AREA_LANDMARKS.put(GEOFENCE_REQUQEST_ID, new LatLng(65.013131,25.516443));
     }
 
 

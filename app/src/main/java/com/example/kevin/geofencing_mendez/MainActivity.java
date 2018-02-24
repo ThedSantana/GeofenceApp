@@ -54,14 +54,14 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleMap map;
     private Button get_location_button;
     private Button get_last_location;
+    private Button start_geofence_button;
     private GoogleApiClient googleApiClient;
     private Location lastLocation;
     private LocationManager locationManager;
     private LocationRequest locationRequest;
     private Geofence mGeofence;
     private PendingIntent pendingIntent;
-
-
+    //private LatLng latLngTest = new LatLng(65.013131, 25.516443);
 
 
     @Override
@@ -72,17 +72,25 @@ public class MainActivity extends AppCompatActivity implements
         tv_latitud = (TextView) findViewById(R.id.tv_lat);
         tv_longitud = (TextView) findViewById(R.id.tv_long);
         get_location_button = (Button) findViewById(R.id.get_location);
-        get_last_location = (Button)findViewById(R.id.get_last_location) ;
-        mGeofence = getGeofence();
+        get_last_location = (Button) findViewById(R.id.get_last_location);
+        start_geofence_button = (Button) findViewById(R.id.start_geofence);
+        //mGeofence = createGeofence(latLngTest,10);
 
 
         initMap();
-        Toast.makeText(getApplication(),"welcome to app",Toast.LENGTH_LONG);
+        createGoogleApi();
+
 
         get_location_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 get_location();
+            }
+        });
+        start_geofence_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startGeofencing();
             }
         });
         get_last_location.setOnClickListener(new View.OnClickListener() {
@@ -92,17 +100,18 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        createGoogleApi();
+
 
 
     }
+
     @Override
     protected void onStart() {
         super.onStart();
 
         // Call GoogleApiClient connection when starting the Activity
         googleApiClient.connect();
-        Toast.makeText(getApplication(),"connected to goole api",Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplication(), "connected to goole api", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -112,12 +121,13 @@ public class MainActivity extends AppCompatActivity implements
         // Disconnect GoogleApiClient when stopping Activity
         googleApiClient.disconnect();
     }
-    private void createGoogleApi(){
-        if(googleApiClient == null){
-            googleApiClient = new GoogleApiClient.Builder( this )
-                    .addConnectionCallbacks( this )
-                    .addOnConnectionFailedListener( this )
-                    .addApi( LocationServices.API )
+
+    private void createGoogleApi() {
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
                     .build();
         }
     }
@@ -128,7 +138,8 @@ public class MainActivity extends AppCompatActivity implements
 
 
     }
-    private void get_location(){
+
+    private void get_location() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -140,21 +151,21 @@ public class MainActivity extends AppCompatActivity implements
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     double latitud = location.getLatitude();
                     double longitude = location.getLongitude();
-                    LatLng latLng = new LatLng(latitud,longitude);
+                    LatLng latLng = new LatLng(latitud, longitude);
                     Geocoder geocoder = new Geocoder(getApplicationContext());
                     try {
-                        List<android.location.Address> addressList = geocoder.getFromLocation(latitud,longitude,1);
+                        List<android.location.Address> addressList = geocoder.getFromLocation(latitud, longitude, 1);
                         String str = addressList.get(0).getLocality() + ", ";
                         str += addressList.get(0).getCountryName();
                         map.addMarker(new MarkerOptions().position(latLng).title(str));
-                       // map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,10.0f));
+                        // map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10.0f));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -177,16 +188,16 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
 
-        }else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     double latitud = location.getLatitude();
                     double longitude = location.getLongitude();
-                    LatLng latLng = new LatLng(latitud,longitude);
+                    LatLng latLng = new LatLng(latitud, longitude);
                     Geocoder geocoder = new Geocoder(getApplicationContext());
                     try {
-                        List<android.location.Address> addressList = geocoder.getFromLocation(latitud,longitude,1);
+                        List<android.location.Address> addressList = geocoder.getFromLocation(latitud, longitude, 1);
                         String str = addressList.get(0).getLocality() + ", ";
                         str += addressList.get(0).getCountryName();
                         map.addMarker(new MarkerOptions().position(latLng).title(str));
@@ -216,8 +227,9 @@ public class MainActivity extends AppCompatActivity implements
         }
 
     }
-    private Geofence createGeofence(LatLng latLng, float radius){
-        Log.d("GEOFENCE","geofence created");
+
+    private Geofence createGeofence(LatLng latLng, float radius) {
+        Log.d("GEOFENCE", "geofence created");
         return new Geofence.Builder()
                 .setRequestId(Constants.GEOFENCE_REQUQEST_ID)
                 .setCircularRegion(latLng.latitude, latLng.longitude, radius)
@@ -226,24 +238,23 @@ public class MainActivity extends AppCompatActivity implements
                 .build();
 
     }
-    private GeofencingRequest createGeofenceRequest(Geofence geofence){
-                GeofencingRequest request = new GeofencingRequest.Builder().
-                        setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER).
-                        addGeofence(geofence).build();
-                return   request;
+
+    private GeofencingRequest createGeofenceRequest(Geofence geofence) {
+        GeofencingRequest request = new GeofencingRequest.Builder().
+                setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER).
+                addGeofence(geofence).build();
+        return request;
     }
-
-
 
 
     @Override
     public void onMapClick(LatLng latLng) {
-        Toast.makeText(getApplicationContext(),latLng.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), latLng.toString(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        Toast.makeText(getApplicationContext(),marker.getPosition().toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), marker.getPosition().toString(), Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -265,27 +276,28 @@ public class MainActivity extends AppCompatActivity implements
         Log.d("CHECK PERMISSION", "checkPermission()");
         // Ask for permission if it wasn't granted yet
         return (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED );
+                == PackageManager.PERMISSION_GRANTED);
     }
 
-    private void getLastKnownLocation(){
-        if(checkPermission()){
+    private void getLastKnownLocation() {
+        if (checkPermission()) {
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-            if(lastLocation != null){
+            if (lastLocation != null) {
                 writeLastLocation();
                 startLocationUpdates();
 
             }
         }
     }
-    private void startLocationUpdates(){
-        Log.i("Location Update:", "startLocationUpdates()");
+
+    private void startLocationUpdates() {
+        Log.i("Location Update", "startLocationUpdates()");
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(Constants.UPDATE_INTERVAL)
                 .setFastestInterval(Constants.FASTEST_INTERVAL);
 
-        if ( checkPermission() )
+        if (checkPermission())
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new com.google.android.gms.location.LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -300,12 +312,13 @@ public class MainActivity extends AppCompatActivity implements
     private void writeLastLocation() {
         writeActualLocation(lastLocation);
     }
+
     private void writeActualLocation(Location location) {
-        tv_latitud.setText( "Lat: " + location.getLatitude() );
-        tv_longitud.setText( "Long: " + location.getLongitude() );
+        tv_latitud.setText("Lat: " + location.getLatitude());
+        tv_longitud.setText("Long: " + location.getLongitude());
     }
 
-    private Geofence getGeofence(){
+    private Geofence getGeofence() {
         LatLng latLng = Constants.AREA_LANDMARKS.get(Constants.GEOFENCE_REQUQEST_ID);
         return new Geofence.Builder()
                 .setRequestId(Constants.GEOFENCE_REQUQEST_ID)
@@ -318,11 +331,62 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private GeofencingRequest getGeofencingRequest() {
+        mGeofence = getGeofence();
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofence(mGeofence);
-       
+
         return builder.build();
+    }
+
+    private void startGeofencing() {
+//        LatLng latLng = Constants.AREA_LANDMARKS.get(Constants.GEOFENCE_REQUQEST_ID);
+//        Geofence geofence = new Geofence.Builder()
+//                .setRequestId(Constants.GEOFENCE_REQUQEST_ID)
+//                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+//                .setCircularRegion(latLng.latitude, latLng.longitude, Constants.GEOFENCE_RADIUS)
+//                .setNotificationResponsiveness(1000)
+//                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+//                .build();
+//
+//        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+//        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+//        builder.addGeofence(geofence);
+//
+//        Intent intent = new Intent(this, GeofenceService.class);
+//        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
+//                FLAG_UPDATE_CURRENT);
+//
+//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        LocationServices.GeofencingApi.addGeofences(googleApiClient, getGeofencingRequest(), pendingIntent).
+//                setResultCallback(new ResultCallback<Status>() {
+//                    @Override
+//                    public void onResult( Status status) {
+//                            Toast.makeText(getApplicationContext(),"Geofence started",Toast.LENGTH_LONG);
+//                    }
+//                });
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        LocationServices.GeofencingApi.addGeofences(googleApiClient, getGeofencingRequest(), getGeofencePendingIntent());
     }
 
     private PendingIntent getGeofencePendingIntent() {
@@ -330,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements
             return pendingIntent;
         }
         Intent intent = new Intent(this, GeofenceService.class);
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
+        return PendingIntent.getService(this, 0, intent, pendingIntent.
                 FLAG_UPDATE_CURRENT);
     }
 

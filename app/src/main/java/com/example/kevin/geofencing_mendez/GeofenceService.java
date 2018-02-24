@@ -27,13 +27,14 @@ public class GeofenceService extends IntentService {
         if (geofencingEvent.hasError()) {
             Log.d(TAG, "GeofencingEvent error " + geofencingEvent.getErrorCode());
         }else{
+            Log.d("GEOFENCE", "GeofencingEvent started " + geofencingEvent.getErrorCode());
             int transaction = geofencingEvent.getGeofenceTransition();
             List<Geofence> geofences = geofencingEvent.getTriggeringGeofences();
             Geofence geofence = geofences.get(0);
             if (transaction == Geofence.GEOFENCE_TRANSITION_ENTER && geofence.getRequestId().equals(Constants.GEOFENCE_REQUQEST_ID)) {
-                Log.d(TAG, "You are inside Stanford University");
+                Log.d(TAG, "You are inside Peltola");
             } else {
-                Log.d(TAG, "You are outside Stanford University");
+                Log.d(TAG, "You are outside Peltola");
             }
         }
     }
